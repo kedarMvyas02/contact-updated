@@ -1,0 +1,22 @@
+const express = require("express");
+const limiter = require("../middleware/rateLimiter");
+const validateToken = require("../middleware/validateTokenHandler");
+const userController = require("../controllers/userController");
+const { auth } = require("../middleware/authMiddleware");
+
+const router = express.Router();
+
+router.post("/register", auth, userController.registerUser);
+router.use("/login", limiter);
+router.post("/login", userController.loginUser);
+router.post("/logOut", validateToken, userController.logOut);
+router.get("/current", validateToken, userController.currentUser);
+router.delete("/deleteUser", validateToken, userController.deleteUser);
+router.post("/forgotPassword", validateToken, userController.forgotPassword);
+router.patch(
+  "/resetPassword/:token",
+  validateToken,
+  userController.resetPassword
+);
+
+module.exports = router;
