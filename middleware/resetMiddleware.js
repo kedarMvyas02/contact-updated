@@ -28,4 +28,4 @@ const resetAuth = asyncHandler(async (req, res, next) => {
   next();
 });
 
-module.exports = { resetAuth };
+module.exports = resetAuth;

@@ -2,8 +2,8 @@ const express = require("express");
 const limiter = require("../middleware/rateLimiter");
 const validateToken = require("../middleware/validateTokenHandler");
 const userController = require("../controllers/userController");
-const { auth } = require("../middleware/authMiddleware");
-const { resetAuth } = require("../middleware/resetMiddleware");
+const auth = require("../middleware/authMiddleware");
+const resetAuth = require("../middleware/resetMiddleware");
 
 const router = express.Router();
 
