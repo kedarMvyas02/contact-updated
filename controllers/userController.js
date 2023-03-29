@@ -21,6 +21,31 @@ const hashToken = (token) => {
 };
 
 ////////////////////////////////////////////////////////////////
+
+const JWTtokenGenerator = (user) => {
+  const accessToken = jwt.sign(
+    // we have to pass a payload inside object in sign method
+    // payload's data can be exposed easily from jwt.io website
+    // so we usually  only pass the user id, and not other imp
+    // details here
+    {
+      id: user._id,
+    }, // now we have to pass a secret key
+    // who tf knows y
+    // (edit): ACCESS_TOKEN_SECRET is used to verify the token is
+    // real or not and if slightly changed, jwt's methods will
+    // identify malicious activities if done
+    process.env.ACCESS_TOKEN_SECRET,
+    // now since token is generated, we have to pass an
+    // expiration time of that particular token
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    }
+  );
+  return accessToken;
+};
+
+////////////////////////////////////////////////////////////////
 // const multerStorage = multer.diskStorage({
 //   destination: (req, file, cb) => {
 //     cb(null, "public/img");
@@ -119,25 +144,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
 
   if (decryptedPass) {
     // access token making is in process
-    const accessToken = jwt.sign(
-      // we have to pass a payload inside object in sign method
-      // payload's data can be exposed easily from jwt.io website
-      // so we usually  only pass the user id, and not other imp
-      // details here
-      {
-        id: userEmail._id,
-      }, // now we have to pass a secret key
-      // who tf knows y
-      // (edit): ACCESS_TOKEN_SECRET is used to verify the token is
-      // real or not and if slightly changed, jwt's methods will
-      // identify malicious activities if done
-      process.env.ACCESS_TOKEN_SECRET,
-      // now since token is generated, we have to pass an
-      // expiration time of that particular token
-      {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      }
-    );
+    const accessToken = JWTtokenGenerator(userEmail);
 
     // trying to implement cookie here
     // const cookieOptions = {
@@ -290,23 +297,19 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 ////////////////////////////////////////////////////
 
 const resetPassword = asyncHandler(async (req, res, next) => {
-  // 1) Get user based on the token
+  const password = req.body.password;
   const token = req.params.token;
   const hashedToken = hashToken(token);
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,
-    // passwordResetExpires: { $gt: Date.now() },
   });
-
-  // 2) if token not expired and there is a user,
-  // set new password
 
   if (!user) {
     return next(new AppError("Token is invalid", 400));
   }
-  const temp = req.body.password;
-  const hashedPassword = await bcrypt.hash(temp, 10);
+
+  const hashedPassword = await bcrypt.hash(password, 10);
   user.password = hashedPassword;
   user.passwordResetToken = undefined;
   // user.passwordResetExpires = undefined;
@@ -314,15 +317,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
   // 4) log the user in, send jwt
 
-  const accessToken = jwt.sign(
-    {
-      id: user._id,
-    },
-    process.env.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: "30d",
-    }
-  );
+  const accessToken = JWTtokenGenerator(user);
   res.status(200).json({ accessToken });
 });
 

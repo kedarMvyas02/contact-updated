@@ -31,8 +31,7 @@ const validateToken = asyncHandler(async (req, res, next) => {
         return new AppError("User is not Authorized", 401);
       } else {
         const userExists = await User.findById(decoded.id);
-        console.log("decoded....", decoded);
-        console.log("userExists....", userExists);
+
         if (!userExists) {
           return new AppError("User does not exists", 401);
         }

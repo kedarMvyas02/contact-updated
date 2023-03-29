@@ -23,11 +23,18 @@ const auth = asyncHandler(async (req, res, next) => {
     return next(new AppError("User Already registered", 400));
   }
 
-  if (password > passwordConfirm) {
-    return next(
-      new AppError("Password and Password Confirm does not match", 400)
-    );
+  if (
+    password.match(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/)
+  ) {
+    if (password !== passwordConfirm) {
+      return next(
+        new AppError("Password and Password Confirm does not match", 400)
+      );
+    }
+  } else {
+    return next(new AppError("Password is too weak", 400));
   }
+
   const emailRegex =
     /^[-!#$%&'*+\/0-9=?A-Z^_a-z{|}~](\.?[-!#$%&'*+\/0-9=?A-Z^_a-z`{|}~])*@[a-zA-Z0-9](-*\.?[a-zA-Z0-9])*\.[a-zA-Z](-?[a-zA-Z0-9])+$/;
   if (!emailRegex.test(email)) {

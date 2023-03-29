@@ -3,6 +3,7 @@ const limiter = require("../middleware/rateLimiter");
 const validateToken = require("../middleware/validateTokenHandler");
 const userController = require("../controllers/userController");
 const { auth } = require("../middleware/authMiddleware");
+const { resetAuth } = require("../middleware/resetMiddleware");
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.post("/forgotPassword", validateToken, userController.forgotPassword);
 router.patch(
   "/resetPassword/:token",
   validateToken,
+  resetAuth,
   userController.resetPassword
 );
 
