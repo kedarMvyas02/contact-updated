@@ -93,8 +93,8 @@ const registerUser = asyncHandler(async (req, res, next) => {
   const { username, email, password } = req.body;
 
   // Hash Password
-
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const salt = await bcrypt.genSalt();
+  const hashedPassword = await bcrypt.hash(password, salt);
 
   // create user in mongoDB
 
@@ -309,7 +309,8 @@ const resetPassword = asyncHandler(async (req, res, next) => {
     return next(new AppError("Token is invalid", 400));
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const salt = await bcrypt.genSalt();
+  const hashedPassword = await bcrypt.hash(password, salt);
   user.password = hashedPassword;
   user.passwordResetToken = undefined;
   // user.passwordResetExpires = undefined;
