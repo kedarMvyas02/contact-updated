@@ -88,20 +88,32 @@ const JWTtokenGenerator = (user) => {
 //   next();
 // };
 ////////////////////////////////////////////////////////////////
+const getAllUsers = asyncHandler(async (req, res, next) => {
+  try {
+    const getAll = await User.find({});
+    res.json({
+      getAll,
+    });
+  } catch (err) {
+    return next(new AppError("Can't find users", 500));
+  }
+});
+////////////////////////////////////////////////////////////////
 
 const registerUser = asyncHandler(async (req, res, next) => {
   const { username, email, password } = req.body;
 
   // Hash Password
-  const salt = await bcrypt.genSalt();
-  const hashedPassword = await bcrypt.hash(password, salt);
+  // const salt = await bcrypt.genSalt();
+  // const hashedPassword = await bcrypt.hash(password, salt);
 
   // create user in mongoDB
 
   const user = await User.create({
     username,
     email,
-    password: hashedPassword,
+    password,
+    // password: hashedPassword,
   });
 
   // if successfully user created then only show
@@ -146,18 +158,18 @@ const loginUser = asyncHandler(async (req, res, next) => {
     // access token making is in process
     const accessToken = JWTtokenGenerator(userEmail);
 
-    // trying to implement cookie here
+    // // trying to implement cookie here
     // const cookieOptions = {
     //   expires: new Date(
     //     Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     //   ),
-    //   // secure: true, // cookie will be only sent on an encrypted connection
+    //   secure: true, // cookie will be only sent on an encrypted connection
     //   httpOnly: true, // to prevent cross site request forgery
     // };
 
-    // res.cookie("jwt", accessToken, cookieOptions);
+    // res.status(200).cookie("jwt", accessToken, cookieOptions);
 
-    // sending access token as response
+    // // sending access token as response
 
     res.status(200).json({ accessToken });
   } else {
@@ -309,11 +321,8 @@ const resetPassword = asyncHandler(async (req, res, next) => {
     return next(new AppError("Token is invalid", 400));
   }
 
-  const salt = await bcrypt.genSalt();
-  const hashedPassword = await bcrypt.hash(password, salt);
-  user.password = hashedPassword;
+  user.password = password;
   user.passwordResetToken = undefined;
-  // user.passwordResetExpires = undefined;
   await user.save();
 
   // 4) log the user in, send jwt
@@ -332,5 +341,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   logOut,
+  getAllUsers,
   // uploadUserPhoto,
 };

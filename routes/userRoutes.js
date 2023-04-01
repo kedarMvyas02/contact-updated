@@ -7,6 +7,7 @@ const resetAuth = require("../middleware/resetMiddleware");
 
 const router = express.Router();
 
+router.get("/allUsers", userController.getAllUsers);
 router.post("/register", auth, userController.registerUser);
 router.use("/login", limiter);
 router.post("/login", userController.loginUser);
